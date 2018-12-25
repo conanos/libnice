@@ -59,7 +59,6 @@ class LibniceConan(ConanFile):
             "..\..\glib\lib" : ";".join([os.path.join(self.deps_cpp_info["glib"].rootpath,"lib"),
                                          os.path.join(self.deps_cpp_info["gnutls"].rootpath,"lib")]),
             "gio-2.0.lib" : " ".join(["gio-2.0.lib","gnutls%s.lib"%("d" if self.options.shared else "")]),
-            "Name=\"VCLinkerTool\"" : "\n".join(["Name=\"VCLinkerTool\"","AdditionalOptions=\"/FS\""]),
             "Name=\"VCCLCompilerTool\"" : "\n".join(["Name=\"VCCLCompilerTool\"","AdditionalOptions=\"/FS\""])
         }
         for s, r in replacements.items():
