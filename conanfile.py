@@ -26,7 +26,7 @@ class LibniceConan(ConanFile):
     def requirements(self):
         self.requires.add("glib/2.58.1@conanos/stable")
         self.requires.add("gstreamer/1.14.4@conanos/stable")
-        self.requires.add("gnutls/3.5.19-2@conanos/stable")
+        self.requires.add("gnutls/3.5.19@conanos/stable")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -104,6 +104,27 @@ class LibniceConan(ConanFile):
                       src=os.path.join(self.build_folder,self._source_subfolder,output_rpath))
             self.copy("nice.h", dst=os.path.join(self.package_folder,"include"),
                       src=os.path.join(self.build_folder,self._source_subfolder,"nice"))
+            for i in ["address.h","agent.h","candidate.h","debug.h"]:
+                self.copy(i, dst=os.path.join(self.package_folder,"include"),
+                          src=os.path.join(self.build_folder,self._source_subfolder,"agent"))
+
+            tools.mkdir(os.path.join(self.package_folder,"lib","pkgconfig"))
+            replacements = {
+                "@prefix@"          : self.package_folder,
+                "@exec_prefix@"     : "${prefix}/lib",
+                "@libdir@"          : "${prefix}/lib",
+                "@includedir@"      : "${prefix}/include",
+                "@UPNP_ENABLED@"    : "",
+                "@VERSION@"         : self.version,
+                "@NICE_PACKAGES_PUBLIC@"   : "glib-2.0 >= 2.44 gio-2.0 >= 2.44 gobject-2.0 >= 2.44",
+                "@GUPNP_PACKAGES_PUBLIC@"  : "",
+                "@NICE_PACKAGES_PRIVATE@"  : "gthread-2.0 gnutls >= 2.12.0",
+                "@GUPNP_PACKAGES_PRIVATE@" : "",
+            }
+            shutil.copy(os.path.join(self.build_folder,self._source_subfolder,"nice","nice.pc.in"),
+                        os.path.join(self.package_folder,"lib","pkgconfig","nice.pc"))
+            for s, r in replacements.items():
+                tools.replace_in_file(os.path.join(self.package_folder,"lib","pkgconfig","nice.pc"),s,r)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
